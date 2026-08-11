@@ -8,9 +8,11 @@ Custom CUDA GEMM kernels progressively optimized from naive to warp-tiled, bench
 | --- | --- | --- | --- |
 | Naive | 61.9 | 2221.68 | 1.4% |
 | Coalesced | 541.4 | 253.88 | 13.4% |
-| cuBLAS | 4032.6 | 34.08 | 100% |
+| Shared | 842.1 | 163.21 | 22.5% |
+| cuBLAS | 3738.4 | 36.76 | 100% |
 
 ## Kernels
 
 - `01_naive.cu` — one thread per output element, pure global memory access
 - `02_coalesced.cu` — 1D block layout so threadIdx.x maps to column, enabling coalesced reads of B
+- `03_shared.cu` — cooperative shared memory tiling, block loads 32×32 tiles of A and B once and reuses each value 32× across the block
