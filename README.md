@@ -1,6 +1,6 @@
 # CUDA GEMM From Scratch
 
-Custom CUDA GEMM kernels progressively optimized from naive to warp-tiled, benchmarked against cuBLAS on NVIDIA T4.
+Custom CUDA GEMM kernels progressively optimized from naive to register-tiled, benchmarked against cuBLAS on NVIDIA T4.
 
 ## Results (M=N=K=4096, FP32)
 
@@ -9,10 +9,12 @@ Custom CUDA GEMM kernels progressively optimized from naive to warp-tiled, bench
 | Naive | 61.9 | 2221.68 | 1.4% |
 | Coalesced | 541.4 | 253.88 | 13.4% |
 | Shared | 842.1 | 163.21 | 22.5% |
-| cuBLAS | 3738.4 | 36.76 | 100% |
+| 1D tiling | 1838.5 | 74.76 | 45.3% |
+| cuBLAS | 4054.5 | 33.90 | 100% |
 
 ## Kernels
 
 - `01_naive.cu` — one thread per output element, pure global memory access
 - `02_coalesced.cu` — 1D block layout so threadIdx.x maps to column, enabling coalesced reads of B
 - `03_shared.cu` — cooperative shared memory tiling, block loads 32×32 tiles of A and B once and reuses each value 32× across the block
+- `04_1d_tiling.cu` — each thread computes an 8×1 strip of C, hoisting the shared B load out of the inner loop so one B value is reused across 8 multiply-adds
